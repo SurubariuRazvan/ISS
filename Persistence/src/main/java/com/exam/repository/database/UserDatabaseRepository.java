@@ -3,7 +3,6 @@ package com.exam.repository.database;
 import com.exam.domain.User;
 import com.exam.domain.UserType;
 import com.exam.repository.UserRepository;
-import com.exam.validation.CRUDValidator;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
@@ -13,8 +12,8 @@ import java.util.List;
 
 @Repository
 public class UserDatabaseRepository extends AbstractDatabaseRepository<User, Integer> implements UserRepository {
-    public UserDatabaseRepository(CRUDValidator<User> validator) {
-        super(validator, User.class);
+    public UserDatabaseRepository() {
+        super(User.class);
     }
 
     @Override

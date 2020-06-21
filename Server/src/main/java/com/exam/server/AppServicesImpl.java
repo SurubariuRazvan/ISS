@@ -2,16 +2,11 @@ package com.exam.server;
 
 import com.exam.domain.*;
 import com.exam.repository.UserRepository;
-import com.exam.repository.database.UserDatabaseRepository;
 import com.exam.service.AppServiceException;
 import com.exam.service.IAppObserver;
 import com.exam.service.IAppServices;
-import com.exam.validation.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
@@ -19,8 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 
 @Service
