@@ -1,18 +1,17 @@
 package com.exam.service;
 
 import com.exam.domain.Employee;
-import com.exam.domain.Manager;
-import com.exam.domain.Task;
+import com.exam.domain.Employee_Paper;
+import com.exam.domain.Paper;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 
 public interface IAppObserver extends Remote {
-    void updateAdministratorWindow(Employee employee, Manager manager, Boolean isDelete) throws RemoteException;
+    void updateWindows(List<Employee_Paper> papers) throws RemoteException;
 
-    void updateWindows(Task task) throws RemoteException;
+    void loggedIn(Employee employee) throws RemoteException;
 
-    void employeeLoggedIn(Employee employee) throws RemoteException;
-
-    void employeeLoggedOut(Employee employee) throws RemoteException;
+    void loggedOut(Employee employee) throws RemoteException;
 }

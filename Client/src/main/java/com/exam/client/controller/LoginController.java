@@ -1,8 +1,9 @@
 package com.exam.client.controller;
 
+import com.exam.client.gui.GuiUtility;
 import com.exam.domain.Employee;
-import com.exam.domain.Manager;
-import com.exam.domain.Task;
+import com.exam.domain.Employee_Paper;
+import com.exam.domain.Paper;
 import com.exam.domain.User;
 import com.exam.service.AppServiceException;
 import com.exam.service.IAppObserver;
@@ -12,11 +13,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.effect.BoxBlur;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -24,6 +22,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class LoginController extends UnicastRemoteObject implements Initializable, IAppObserver, Serializable {
@@ -97,22 +96,17 @@ public class LoginController extends UnicastRemoteObject implements Initializabl
     }
 
     @Override
-    public void updateAdministratorWindow(Employee employee, Manager manager, Boolean isDelete) throws RemoteException {
-        appController.updateAdministratorWindow(employee, manager, isDelete);
+    public void updateWindows(List<Employee_Paper> paper) throws RemoteException {
+        appController.updateWindows(paper);
     }
 
     @Override
-    public void updateWindows(Task task) throws RemoteException {
-        appController.updateWindows(task);
+    public void loggedIn(Employee employee) throws RemoteException {
+        appController.loggedIn(employee);
     }
 
     @Override
-    public void employeeLoggedIn(Employee employee) throws RemoteException {
-        appController.employeeLoggedIn(employee);
-    }
-
-    @Override
-    public void employeeLoggedOut(Employee employee) throws RemoteException {
-        appController.employeeLoggedOut(employee);
+    public void loggedOut(Employee employee) throws RemoteException {
+        appController.loggedOut(employee);
     }
 }

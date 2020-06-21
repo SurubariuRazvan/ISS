@@ -1,66 +1,43 @@
 package com.exam.rest;
 
-import com.exam.domain.User;
-import com.exam.domain.UserType;
+import com.exam.domain.*;
+import com.exam.repository.PaperRepository;
 import com.exam.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.lang.Math.abs;
 
 @org.springframework.web.bind.annotation.RestController
-@RequestMapping("/user")
+@RequestMapping("/exam")
 public class RestController {
     private final UserRepository userRepo;
+    private final PaperRepository paperRepo;
 
     @Autowired
-    public RestController(UserRepository userRepository) {
+    public RestController(UserRepository userRepository, PaperRepository paperRepository) {
         this.userRepo = userRepository;
+        this.paperRepo = paperRepository;
     }
 
-    @GetMapping()
-    public Iterable<User> getUsers() {
-        return userRepo.findAll();
-    }
-
-    @GetMapping("/{userType}")
-    public Iterable<User> getUsersByType(@PathVariable UserType userType) {
-        return userRepo.findAllByUserType(userType);
-    }
-
-    @PostMapping()
-    public String saveUser(@RequestBody User user) {
-        try {
-            if (userRepo.save(user) == null)
-                return "User saved";
-            else
-                return "User not saved";
-        } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage(), ex);
+    @GetMapping("/employee/{id}")
+    public Iterable<Paper> getReevaluatingPapers(@PathVariable Integer id) {
+        List<Paper> papers = new ArrayList<>();
+        for (Employee_Paper ep : ((Employee) userRepo.findByID(id)).getPapers()) {
+            var employees = ep.getPaper().getEmployees();
+            Double grade1 = employees.get(0).getGrade();
+            Double grade2 = employees.get(1).getGrade();
+            if (!grade1.equals(0.0) && !grade2.equals(0.0) && abs(grade1 - grade2) > 1)
+                papers.add(ep.getPaper());
         }
+        return papers;
     }
 
-    @PutMapping("/{id}")
-    public String updateUser(@RequestBody User newUser, @PathVariable Integer id) {
-        newUser.setId(id);
-        try {
-            User oldUser = userRepo.findByID(id);
-            if (oldUser == null)
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User doesn't exist");
-            userRepo.update(newUser);
-        } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage(), ex);
-        }
-        return "User updated";
-    }
-
-    @DeleteMapping("/{id}")
-    public String deleteUser(@PathVariable Integer id) {
-        try {
-            userRepo.delete(id);
-        } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
-        }
-        return "User deleted";
+    @GetMapping("/paper/{id}")
+    public Paper getEmployees(@PathVariable Integer id) {
+        return paperRepo.findByID(id);
     }
 }

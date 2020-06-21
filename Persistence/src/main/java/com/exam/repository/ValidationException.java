@@ -1,4 +1,4 @@
-package com.exam.validation;
+package com.exam.repository;
 
 public class ValidationException extends RuntimeException {
     public ValidationException(String message) {

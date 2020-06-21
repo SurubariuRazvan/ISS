@@ -1,23 +1,16 @@
 package com.exam.client.controller;
 
 import com.exam.domain.Employee;
-import com.exam.domain.Manager;
-import com.exam.domain.Task;
+import com.exam.domain.Employee_Paper;
+import com.exam.domain.Paper;
 import com.exam.domain.User;
 import com.exam.service.AppServiceException;
 import com.exam.service.IAppServices;
-import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.control.*;
-import javafx.scene.effect.BoxBlur;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
-import javafx.util.Callback;
 
-import java.util.function.BiConsumer;
-import java.util.function.Supplier;
+import java.util.List;
 
 
 public abstract class UserController<U extends User> implements Initializable, IUserController {
@@ -44,18 +37,14 @@ public abstract class UserController<U extends User> implements Initializable, I
     }
 
     @Override
-    public void updateWindows(Task task) {
+    public void updateWindows(List<Employee_Paper> papers) {
     }
 
     @Override
-    public void employeeLoggedIn(Employee employee) {
+    public void loggedIn(Employee employee) {
     }
 
     @Override
-    public void employeeLoggedOut(Employee employee) {
-    }
-
-    @Override
-    public void updateAdministratorWindow(Employee employee, Manager manager, Boolean isDelete) {
+    public void loggedOut(Employee employee) {
     }
 }

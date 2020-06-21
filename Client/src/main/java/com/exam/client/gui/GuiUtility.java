@@ -1,9 +1,12 @@
-package com.exam.client.controller;
+package com.exam.client.gui;
 
 import javafx.event.ActionEvent;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.effect.BoxBlur;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -77,6 +80,32 @@ public class GuiUtility {
                     }
                 };
             }
+        });
+    }
+
+    public static void initSpinner(Spinner<Integer> s, Integer start, Integer end) {
+        s.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(start, end, start));
+        s.getEditor().setAlignment(Pos.CENTER);
+        s.getEditor().addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.ENTER)
+                try {
+                    Integer.parseInt(s.getEditor().textProperty().get());
+                } catch (NumberFormatException e) {
+                    s.getEditor().textProperty().set(start.toString());
+                }
+        });
+    }
+
+    public static void initSpinner(Spinner<Double> s, Double start, Double end) {
+        s.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(start, end, start));
+        s.getEditor().setAlignment(Pos.CENTER);
+        s.getEditor().addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.ENTER)
+                try {
+                    Integer.parseInt(s.getEditor().textProperty().get());
+                } catch (NumberFormatException e) {
+                    s.getEditor().textProperty().set(start.toString());
+                }
         });
     }
 }

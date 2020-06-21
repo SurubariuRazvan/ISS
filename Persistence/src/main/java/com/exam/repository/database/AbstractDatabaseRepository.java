@@ -2,8 +2,7 @@ package com.exam.repository.database;
 
 import com.exam.domain.Entity;
 import com.exam.repository.CRUDRepository;
-import com.exam.validation.CRUDValidator;
-import com.exam.validation.ValidationException;
+import com.exam.repository.ValidationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -13,7 +12,6 @@ import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.query.Query;
-import org.springframework.stereotype.Repository;
 
 import java.io.Serializable;
 import java.util.List;
@@ -22,11 +20,9 @@ import java.util.List;
 public abstract class AbstractDatabaseRepository<E extends Entity<ID>, ID extends Serializable> implements CRUDRepository<E, ID> {
     protected static final Logger logger = LogManager.getLogger();
     protected static SessionFactory sessionFactory;
-    protected final CRUDValidator<E> validator;
     protected final Class<E> entityType;
 
-    AbstractDatabaseRepository(CRUDValidator<E> validator, Class<E> entityType) {
-        this.validator = validator;
+    AbstractDatabaseRepository(Class<E> entityType) {
         this.entityType = entityType;
         StandardServiceRegistry registry = new StandardServiceRegistryBuilder().configure().build();
         try {
@@ -84,7 +80,6 @@ public abstract class AbstractDatabaseRepository<E extends Entity<ID>, ID extend
         if (entity == null)
             throw new IllegalArgumentException("entity is null");
         logger.info("Save new " + entityType.getName());
-        validator.validate(entity);
         if (entity.getId() != null && this.findByID(entity.getId()) != null)
             throw new ValidationException("duplicate");
 
@@ -132,7 +127,6 @@ public abstract class AbstractDatabaseRepository<E extends Entity<ID>, ID extend
         if (entity == null)
             throw new IllegalArgumentException("entity is null");
         logger.info("Update " + entityType.getName() + " with id: " + entity.getId());
-        validator.validate(entity);
 
         E old = this.findByID(entity.getId());
         if (old != null) {

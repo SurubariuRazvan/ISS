@@ -3,7 +3,6 @@ package com.exam.repository.database;
 import com.exam.domain.User;
 import com.exam.domain.UserType;
 import com.exam.repository.UserRepository;
-import com.exam.validation.CRUDValidator;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
@@ -13,8 +12,8 @@ import java.util.List;
 
 @Repository
 public class UserDatabaseRepository extends AbstractDatabaseRepository<User, Integer> implements UserRepository {
-    public UserDatabaseRepository(CRUDValidator<User> validator) {
-        super(validator, User.class);
+    public UserDatabaseRepository() {
+        super(User.class);
     }
 
     @Override
@@ -34,27 +33,6 @@ public class UserDatabaseRepository extends AbstractDatabaseRepository<User, Int
                 tx.commit();
                 return result;
             } catch (RuntimeException e) {
-                if (tx != null)
-                    tx.rollback();
-                return null;
-            }
-        }
-    }
-
-    @Override
-    public List<User> findAllByUserType(UserType userType) {
-        logger.info("Find all " + entityType.getName() + " by user type");
-        try (Session session = sessionFactory.openSession()) {
-            Transaction tx = null;
-            try {
-                tx = session.beginTransaction();
-                Query<User> query = session.createQuery("from " + this.entityType.getSimpleName() + " where userType = :userType", entityType);
-                query.setParameter("userType", userType);
-                List<User> entities = query.list();
-                tx.commit();
-                return entities;
-            } catch (RuntimeException e) {
-                e.printStackTrace();
                 if (tx != null)
                     tx.rollback();
                 return null;
