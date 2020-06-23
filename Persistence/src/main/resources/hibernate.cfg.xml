@@ -13,9 +13,12 @@
         <property name="show_sql">true</property>
 
         <mapping class="com.exam.domain.User"/>
-        <mapping class="com.exam.domain.Participant"/>
-        <mapping class="com.exam.domain.Employee"/>
-        <mapping class="com.exam.domain.Paper"/>
-        <mapping class="com.exam.domain.Employee_Paper"/>
+        <mapping class="com.exam.domain.Student"/>
+        <mapping class="com.exam.domain.Game"/>
+        <mapping class="com.exam.domain.Round"/>
+        <mapping class="com.exam.domain.Word"/>
+        <mapping class="com.exam.domain.WordPK"/>
+        <mapping class="com.exam.domain.UserType"/>
+        <mapping class="com.exam.domain.Category"/>
     </session-factory>
 </hibernate-configuration>

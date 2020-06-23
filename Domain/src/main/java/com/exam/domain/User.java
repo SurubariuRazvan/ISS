@@ -10,7 +10,6 @@ import java.util.Objects;
 @Table(name = "User_table", uniqueConstraints = {@UniqueConstraint(name = "unique_username", columnNames = {"username"})})
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User implements com.exam.domain.Entity<Integer> {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")

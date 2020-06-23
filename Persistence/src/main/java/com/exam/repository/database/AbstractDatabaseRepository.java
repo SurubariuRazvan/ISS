@@ -19,7 +19,7 @@ import java.util.List;
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public abstract class AbstractDatabaseRepository<E extends Entity<ID>, ID extends Serializable> implements CRUDRepository<E, ID> {
     protected static final Logger logger = LogManager.getLogger();
-    protected static SessionFactory sessionFactory;
+    protected SessionFactory sessionFactory;
     protected final Class<E> entityType;
 
     AbstractDatabaseRepository(Class<E> entityType) {
@@ -93,6 +93,7 @@ public abstract class AbstractDatabaseRepository<E extends Entity<ID>, ID extend
             } catch (RuntimeException ex) {
                 if (tx != null)
                     tx.rollback();
+                ex.printStackTrace();
             }
         }
         return entity;

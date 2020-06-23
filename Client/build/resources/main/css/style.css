@@ -48,6 +48,11 @@
     -fx-border-color: -fx-secondary;
 }
 
+.label{
+    -fx-font-size: 18pt;
+    -fx-text-fill: -fx-primarytext;
+}
+
 .text-field:focused, .text-area:focused {
     -fx-text-box-border: transparent;
     -fx-faint-focus-color: transparent;

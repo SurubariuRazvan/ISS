@@ -1,7 +1,9 @@
 package com.exam.rest;
 
-import com.exam.domain.*;
-import com.exam.repository.PaperRepository;
+import com.exam.domain.Category;
+import com.exam.domain.Round;
+import com.exam.domain.Word;
+import com.exam.repository.GameRepository;
 import com.exam.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,29 +17,32 @@ import static java.lang.Math.abs;
 @RequestMapping("/exam")
 public class RestController {
     private final UserRepository userRepo;
-    private final PaperRepository paperRepo;
+    private final GameRepository gameRepo;
 
     @Autowired
-    public RestController(UserRepository userRepository, PaperRepository paperRepository) {
+    public RestController(UserRepository userRepository, GameRepository gameRepository) {
         this.userRepo = userRepository;
-        this.paperRepo = paperRepository;
+        this.gameRepo = gameRepository;
     }
 
-    @GetMapping("/employee/{id}")
-    public Iterable<Paper> getReevaluatingPapers(@PathVariable Integer id) {
-        List<Paper> papers = new ArrayList<>();
-        for (Employee_Paper ep : ((Employee) userRepo.findByID(id)).getPapers()) {
-            var employees = ep.getPaper().getEmployees();
-            Double grade1 = employees.get(0).getGrade();
-            Double grade2 = employees.get(1).getGrade();
-            if (!grade1.equals(0.0) && !grade2.equals(0.0) && abs(grade1 - grade2) > 1)
-                papers.add(ep.getPaper());
-        }
-        return papers;
+    @GetMapping("/game/{id}")
+    public Iterable<String> getCategoriesForGame(@PathVariable Integer id) {
+        List<String> categories = new ArrayList<>();
+        if (gameRepo.findByID(id) != null)
+            for (Round round : gameRepo.findByID(id).getRounds())
+                categories.add(round.getCategory().toString());
+        return categories;
     }
 
-    @GetMapping("/paper/{id}")
-    public Paper getEmployees(@PathVariable Integer id) {
-        return paperRepo.findByID(id);
+    @GetMapping("/words")
+    public Iterable<String> getWordsForGameWithCategory(@RequestParam("gameID") Integer id, @RequestParam("category") Category category) {
+        List<String> words = new ArrayList<>();
+        if (gameRepo.findByID(id) != null)
+            for (Round round : gameRepo.findByID(id).getRounds())
+                if (round.getCategory().equals(category))
+                    for (Word word : round.getWords())
+                        words.add(word.getWord());
+        return words;
     }
+
 }

@@ -1,9 +1,9 @@
 package com.exam.client.controller;
 
 import com.exam.client.gui.GuiUtility;
-import com.exam.domain.Employee;
-import com.exam.domain.Employee_Paper;
-import com.exam.domain.Paper;
+import com.exam.domain.Category;
+import com.exam.domain.Game;
+import com.exam.domain.Round;
 import com.exam.domain.User;
 import com.exam.service.AppServiceException;
 import com.exam.service.IAppObserver;
@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.List;
 import java.util.ResourceBundle;
 
 public class LoginController extends UnicastRemoteObject implements Initializable, IAppObserver, Serializable {
@@ -96,17 +95,37 @@ public class LoginController extends UnicastRemoteObject implements Initializabl
     }
 
     @Override
-    public void updateWindows(List<Employee_Paper> paper) throws RemoteException {
-        appController.updateWindows(paper);
+    public void playerCountUpdated(Integer count) throws RemoteException {
+        appController.playerCountUpdated(count);
     }
 
     @Override
-    public void loggedIn(Employee employee) throws RemoteException {
-        appController.loggedIn(employee);
+    public void startGame() throws RemoteException {
+        appController.startGame();
     }
 
     @Override
-    public void loggedOut(Employee employee) throws RemoteException {
-        appController.loggedOut(employee);
+    public void loggedIn(User user) throws RemoteException {
+        appController.loggedIn(user);
+    }
+
+    @Override
+    public void loggedOut(User user) throws RemoteException {
+        appController.loggedOut(user);
+    }
+
+    @Override
+    public void setCategory(Category currentCategory) throws RemoteException {
+        appController.setCategory(currentCategory);
+    }
+
+    @Override
+    public void setScores(Round currentRound) throws RemoteException {
+        appController.setScores(currentRound);
+    }
+
+    @Override
+    public void finishGame(Game game) throws RemoteException {
+        appController.finishGame(game);
     }
 }

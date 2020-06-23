@@ -1,8 +1,5 @@
 package com.exam.client.controller;
 
-import com.exam.domain.Employee;
-import com.exam.domain.Employee_Paper;
-import com.exam.domain.Paper;
 import com.exam.domain.User;
 import com.exam.service.AppServiceException;
 import com.exam.service.IAppServices;
@@ -10,7 +7,9 @@ import javafx.fxml.Initializable;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 
-import java.util.List;
+import java.net.URL;
+import java.rmi.RemoteException;
+import java.util.ResourceBundle;
 
 
 public abstract class UserController<U extends User> implements Initializable, IUserController {
@@ -37,14 +36,21 @@ public abstract class UserController<U extends User> implements Initializable, I
     }
 
     @Override
-    public void updateWindows(List<Employee_Paper> papers) {
+    public void startGame() throws RemoteException {
+
     }
 
     @Override
-    public void loggedIn(Employee employee) {
+    public void playerCountUpdated(Integer count) throws RemoteException {
+
     }
 
     @Override
-    public void loggedOut(Employee employee) {
+    public void loggedIn(User user) throws RemoteException {
+
+    }
+
+    @Override
+    public void loggedOut(User user) {
     }
 }
