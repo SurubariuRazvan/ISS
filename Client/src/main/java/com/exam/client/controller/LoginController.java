@@ -1,7 +1,6 @@
 package com.exam.client.controller;
 
 import com.exam.client.gui.GuiUtility;
-import com.exam.domain.Category;
 import com.exam.domain.Game;
 import com.exam.domain.Round;
 import com.exam.domain.User;
@@ -112,11 +111,6 @@ public class LoginController extends UnicastRemoteObject implements Initializabl
     @Override
     public void loggedOut(User user) throws RemoteException {
         appController.loggedOut(user);
-    }
-
-    @Override
-    public void setCategory(Category currentCategory) throws RemoteException {
-        appController.setCategory(currentCategory);
     }
 
     @Override

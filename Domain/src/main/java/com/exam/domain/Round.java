@@ -12,11 +12,8 @@ public class Round implements com.exam.domain.Entity<Integer> {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "category")
-    private Category category;
-
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name="game_id")
+    @JoinColumn(name = "game_id")
     private Game game;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "round")
@@ -25,9 +22,8 @@ public class Round implements com.exam.domain.Entity<Integer> {
     public Round() {
     }
 
-    public Round(Integer id, Category category, Game game, Set<Word> words) {
+    public Round(Integer id, Game game, Set<Word> words) {
         this.id = id;
-        this.category = category;
         this.game = game;
         this.words = words;
     }
@@ -42,13 +38,6 @@ public class Round implements com.exam.domain.Entity<Integer> {
         this.id = id;
     }
 
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
 
     public Game getGame() {
         return game;
@@ -64,15 +53,5 @@ public class Round implements com.exam.domain.Entity<Integer> {
 
     public void setWords(Set<Word> words) {
         this.words = words;
-    }
-
-    @Override
-    public String toString() {
-        return "Round{" +
-                "id=" + id +
-                ", category=" + category +
-                ", game=" + game +
-                ", words=" + words +
-                '}';
     }
 }

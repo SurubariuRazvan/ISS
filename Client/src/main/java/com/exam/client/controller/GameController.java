@@ -1,6 +1,7 @@
 package com.exam.client.controller;
 
 import com.exam.client.Players;
+import com.exam.client.gui.GuiUtility;
 import com.exam.domain.*;
 import com.exam.service.AppServiceException;
 import com.exam.service.IAppObserver;
@@ -20,16 +21,23 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.lang.Integer.sum;
+
 public class GameController extends UnicastRemoteObject implements Initializable, IAppObserver, Serializable {
-    public Label categoryLabel;
-    public TextField newWord;
-    public Button sendButton;
     public TableView<Players> scoreTable;
     public TableColumn<Players, Integer> p1;
     public TableColumn<Players, Integer> p2;
     public TableColumn<Players, Integer> p3;
+    public Label p1Field;
+    public Spinner<Integer> p1nr;
+    public Button p1Button;
+    public Label p2Field;
+    public Spinner<Integer> p2nr;
+    public Button p2Button;
     private IAppServices appService;
     private User user;
+    private Integer p1ID;
+    private Integer p2ID;
 
     public GameController() throws RemoteException {
     }
@@ -39,12 +47,14 @@ public class GameController extends UnicastRemoteObject implements Initializable
         p1.setCellValueFactory(new PropertyValueFactory<>("p1Score"));
         p2.setCellValueFactory(new PropertyValueFactory<>("p2Score"));
         p3.setCellValueFactory(new PropertyValueFactory<>("p3Score"));
+        GuiUtility.initSpinner(p1nr, 1, 6);
+        GuiUtility.initSpinner(p2nr, 1, 6);
     }
 
     public void setService(IAppServices appService, User user) {
         this.appService = appService;
         this.user = user;
-        Platform.runLater(() -> categoryLabel.setText(appService.getCategory()));
+        updateWindow(appService, user);
     }
 
 
@@ -65,35 +75,52 @@ public class GameController extends UnicastRemoteObject implements Initializable
     }
 
     @Override
-    public void setCategory(Category currentCategory) throws RemoteException {
-        Platform.runLater(() -> categoryLabel.setText(currentCategory.name()));
-    }
-
-    @Override
     public void setScores(Round currentRound) {
-        List<Players> players = new ArrayList<>();
-        var pp = new ArrayList<>(currentRound.getWords());
-        players.add(new Players(pp.get(0).getValue(), pp.get(1).getValue(), pp.get(2).getValue()));
+        updateWindow(appService, user);
+    }
+
+    private void updateWindow(IAppServices appService, User user) {
+        Map<Integer, String> gameState = appService.getPlayers();
         Platform.runLater(() -> {
-            scoreTable.setItems(FXCollections.observableList(players));
+            boolean p1IsSet = false;
+            for (var a : gameState.keySet().stream().sorted().collect(Collectors.toList()))
+                if (!a.equals(user.getId()))
+                    if (!p1IsSet) {
+                        p1Field.setText(a + ": " + gameState.get(a));
+                        p1IsSet = true;
+                        p1ID = a;
+                    } else {
+                        p2Field.setText(a + ": " + gameState.get(a));
+                        p2ID = a;
+                    }
         });
     }
 
     @Override
-    public void finishGame(Game game) throws RemoteException {
+    public void finishGame(Game game) {
         List<Players> players = new ArrayList<>();
-        for (Round currentRound : game.getRounds()) {
-            var pp = new ArrayList<>(currentRound.getWords());
-            players.add(new Players(pp.get(0).getValue(), pp.get(1).getValue(), pp.get(2).getValue()));
-        }
+        Map<Integer, List<Integer>> scores = new TreeMap<>();
+        for (var a : appService.getPlayers().keySet())
+            scores.put(a, new ArrayList<>());
+        for (Round currentRound : game.getRounds())
+            for (var word : currentRound.getWords())
+                scores.get(word.getStudent().getId()).add(word.getValue());
+        List<Integer> finalScores = new ArrayList<>();
+        for (var a : scores.values())
+            finalScores.add(a.stream().mapToInt(Integer::intValue).sum());
+        players.add(new Players(finalScores.get(0), finalScores.get(1), finalScores.get(2)));
         Platform.runLater(() -> {
             scoreTable.setItems(FXCollections.observableList(players));
-            sendButton.setDisable(true);
         });
     }
 
-    public void send(ActionEvent actionEvent) {
-        appService.sendWord(user, newWord.getText());
+
+    public void p1Send(ActionEvent actionEvent) {
+        appService.sendWord(user, p1ID, p1nr.getValue());
+    }
+
+    public void p2Send(ActionEvent actionEvent) {
+        appService.sendWord(user, p2ID, p2nr.getValue());
     }
 }
 

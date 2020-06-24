@@ -6,6 +6,8 @@ import com.exam.repository.UserRepository;
 import com.exam.service.AppServiceException;
 import com.exam.service.IAppObserver;
 import com.exam.service.IAppServices;
+import org.apache.logging.log4j.util.SortedArrayStringMap;
+import org.hibernate.type.SortedMapType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,42 +22,17 @@ public class AppServicesImpl implements IAppServices {
     private final UserRepository userRepo;
     private final GameRepository gameRepository;
     private final Map<Integer, LoggedUser> loggedUsers;
-    private Category currentCategory;
     private Game game;
     private Round currentRound;
     private Integer roundNumber;
-    private final List<String> fruits = new ArrayList<>();
-    private final List<String> clothes = new ArrayList<>();
-    private final List<String> animals = new ArrayList<>();
-    private final Random rand;
-    private int roundNr = 1000;
-    private int wordNr = 10000;
+    private Integer activePlayers = 0;
+    private Map<Integer, String> gameStates = new HashMap<>();
 
     @Autowired
     public AppServicesImpl(UserRepository userRepository, GameRepository gameRepository) {
         this.userRepo = userRepository;
         this.gameRepository = gameRepository;
         this.loggedUsers = new ConcurrentHashMap<>();
-        this.rand = new Random();
-
-        fruits.add("apple");
-        fruits.add("orange");
-        fruits.add("mango");
-        fruits.add("tomato");
-        fruits.add("banana");
-        fruits.add("lemon");
-
-        clothes.add("pants");
-        clothes.add("t-shirt");
-        clothes.add("shoes");
-        clothes.add("socks");
-
-        animals.add("marten");
-        animals.add("monkey");
-        animals.add("dog");
-        animals.add("cat");
-        animals.add("wolf");
-
         addData();
     }
 
@@ -78,10 +55,14 @@ public class AppServicesImpl implements IAppServices {
     }
 
     @Override
-    public synchronized void playerCountChanged() {
-        for (var user : loggedUsers.values()) {
+    public void sendNumbers(User user, Integer value1, Integer value2) {
+        loggedUsers.get(user.getId()).setBomb1(value1);
+        loggedUsers.get(user.getId()).setBomb2(value2);
+
+        activePlayers++;
+        for (var u : loggedUsers.values()) {
             try {
-                user.getObserver().playerCountUpdated(loggedUsers.size());
+                u.getObserver().playerCountUpdated(activePlayers);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -93,41 +74,15 @@ public class AppServicesImpl implements IAppServices {
         LoggedUser loggedUser = loggedUsers.get(userID);
         if (loggedUser != null) {
             loggedUsers.remove(userID);
-            playerCountChanged();
+//            playerCountChanged();
         } else
             throw new AppServiceException("User isn't logged in");
     }
 
-    public void sendCategory() {
-        for (var user : loggedUsers.values()) {
-            try {
-                user.getObserver().setCategory(this.currentCategory);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void setNewCategory() {
-        int value = rand.nextInt(3);
-        switch (value) {
-            case 0:
-                this.currentCategory = Category.ANIMALS;
-                break;
-            case 1:
-                this.currentCategory = Category.CLOTHES;
-                break;
-            case 2:
-                this.currentCategory = Category.FRUITS;
-                break;
-        }
-    }
-
     @Override
     public void notifyStartGame() {
-        setNewCategory();
         game = new Game(null);
-        currentRound = new Round(null, this.currentCategory, game, new HashSet<>());
+        currentRound = new Round(null, game, new HashSet<>());
         roundNumber = 0;
         for (var user : loggedUsers.values()) {
             try {
@@ -136,13 +91,13 @@ public class AppServicesImpl implements IAppServices {
                 e.printStackTrace();
             }
         }
+        for (var id : loggedUsers.keySet())
+            this.gameStates.put(id, "______");
     }
 
     public void handleRound() {
-        setNewCategory();
-        sendCategory();
         sendScores(currentRound);
-        currentRound = new Round(null, currentCategory, game, new HashSet<>());
+        currentRound = new Round(null, game, new HashSet<>());
     }
 
     private void sendScores(Round currentRound) {
@@ -156,40 +111,27 @@ public class AppServicesImpl implements IAppServices {
     }
 
     @Override
-    public void sendWord(User user, String text) {
-        currentRound.getWords().add(new Word(null, (Student) user, currentRound, text, 5));
+    public void sendWord(User user, Integer toUser, Integer nr) {
+        nr = nr - 1;
+        char[] state = this.gameStates.get(toUser).toCharArray();
+        int b1 = loggedUsers.get(toUser).getBomb1();
+        int b2 = loggedUsers.get(toUser).getBomb2();
+        if (b1 - 1 == nr || b2 - 1 == nr || b1 + 1 == nr || b2 + 1 == nr) {
+            state[nr] = 'B';
+            currentRound.getWords().add(new Word(null, (Student) user, toUser, currentRound, nr + 1, 5, loggedUsers.get(user.getId()).getBomb1(), loggedUsers.get(user.getId()).getBomb2()));
+        } else if (b1 == nr || b2 == nr) {
+            state[nr] = 'C';
+            currentRound.getWords().add(new Word(null, (Student) user, toUser, currentRound, nr + 1, 3, loggedUsers.get(user.getId()).getBomb1(), loggedUsers.get(user.getId()).getBomb2()));
+        } else {
+            state[nr] = 'S';
+            currentRound.getWords().add(new Word(null, (Student) user, toUser, currentRound, nr + 1, 0, loggedUsers.get(user.getId()).getBomb1(), loggedUsers.get(user.getId()).getBomb2()));
+        }
+        this.gameStates.put(toUser, String.valueOf(state));
         if (currentRound.getWords().size() == 3) {
-            for (Word currentWord : currentRound.getWords())
-                switch (currentCategory) {
-                    case ANIMALS:
-                        if (animals.contains(currentWord.getWord())) {
-                            for (Round round : game.getRounds())
-                                for (Word word : round.getWords())
-                                    if (word.getWord().equals(currentWord.getWord()))
-                                        currentWord.setValue(2);
-                        } else currentWord.setValue(0);
-                        break;
-                    case CLOTHES:
-                        if (clothes.contains(currentWord.getWord())) {
-                            for (var round : game.getRounds())
-                                for (var word : round.getWords())
-                                    if (word.getWord().equals(currentWord.getWord()))
-                                        currentWord.setValue(2);
-                        } else currentWord.setValue(0);
-                        break;
-                    case FRUITS:
-                        if (fruits.contains(currentWord.getWord())) {
-                            for (var round : game.getRounds())
-                                for (var word : round.getWords())
-                                    if (word.getWord().equals(currentWord.getWord()))
-                                        currentWord.setValue(2);
-                        } else currentWord.setValue(0);
-                        break;
-                }
             game.addRound(currentRound);
             handleRound();
             roundNumber++;
-            if (roundNumber == 5)
+            if (roundNumber == 3)
                 gameFinished();
         }
     }
@@ -206,7 +148,7 @@ public class AppServicesImpl implements IAppServices {
     }
 
     @Override
-    public String getCategory() {
-        return currentCategory.toString();
+    public Map<Integer, String> getPlayers() {
+        return this.gameStates;
     }
 }

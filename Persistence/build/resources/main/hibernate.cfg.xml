@@ -17,8 +17,6 @@
         <mapping class="com.exam.domain.Game"/>
         <mapping class="com.exam.domain.Round"/>
         <mapping class="com.exam.domain.Word"/>
-        <mapping class="com.exam.domain.WordPK"/>
         <mapping class="com.exam.domain.UserType"/>
-        <mapping class="com.exam.domain.Category"/>
     </session-factory>
 </hibernate-configuration>

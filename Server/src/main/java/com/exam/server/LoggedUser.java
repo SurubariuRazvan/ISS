@@ -5,6 +5,8 @@ import com.exam.service.IAppObserver;
 
 public class LoggedUser {
     private UserType userType;
+    private Integer bomb1;
+    private Integer bomb2;
     private IAppObserver observer;
 
     public LoggedUser(UserType userType, IAppObserver observer) {
@@ -26,5 +28,21 @@ public class LoggedUser {
 
     public void setObserver(IAppObserver observer) {
         this.observer = observer;
+    }
+
+    public Integer getBomb1() {
+        return bomb1;
+    }
+
+    public void setBomb1(Integer bomb1) {
+        this.bomb1 = bomb1;
+    }
+
+    public Integer getBomb2() {
+        return bomb2;
+    }
+
+    public void setBomb2(Integer bomb2) {
+        this.bomb2 = bomb2;
     }
 }

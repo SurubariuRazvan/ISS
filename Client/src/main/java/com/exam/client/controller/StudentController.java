@@ -1,5 +1,6 @@
 package com.exam.client.controller;
 
+import com.exam.client.gui.GuiUtility;
 import com.exam.domain.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -7,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
@@ -20,26 +22,38 @@ public class StudentController extends UserController<Student> {
     public Label waitingLabel;
     public Button startGame;
     public GameController gameController;
+    public Spinner<Integer> nr1;
+    public Spinner<Integer> nr2;
+    private Integer count = 0;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        startGame.setDisable(true);
+        startGame.setDisable(false);
+        GuiUtility.initSpinner(nr1, 1, 6);
+        GuiUtility.initSpinner(nr2, 1, 6);
     }
 
     protected void postInitialization() {
-        appService.playerCountChanged();
     }
 
     @Override
     public void playerCountUpdated(Integer count) throws RemoteException {
+        this.count = count;
         Platform.runLater(() -> {
             waitingLabel.setText(count + "/3 players logged in");
-            startGame.setDisable(count < 3);
+            if (count >= 3) {
+                startGame.setText("Start Game");
+                startGame.setDisable(false);
+            }
         });
     }
 
     public void start(ActionEvent actionEvent) {
-        appService.notifyStartGame();
+        startGame.setDisable(true);
+        if (count >= 3)
+            appService.notifyStartGame();
+        else
+            appService.sendNumbers(user, nr1.getValue(), nr2.getValue());
     }
 
     @Override
@@ -62,11 +76,6 @@ public class StudentController extends UserController<Student> {
                 e.printStackTrace();
             }
         });
-    }
-
-    @Override
-    public void setCategory(Category currentCategory) throws RemoteException {
-        gameController.setCategory(currentCategory);
     }
 
     @Override

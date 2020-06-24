@@ -3,6 +3,7 @@ package com.exam.service;
 import com.exam.domain.*;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IAppServices {
     User login(String username, String password, IAppObserver client) throws AppServiceException;
@@ -11,9 +12,9 @@ public interface IAppServices {
 
     void notifyStartGame();
 
-    void playerCountChanged();
+    void sendWord(User user, Integer toUser, Integer text);
 
-    void sendWord(User user, String text);
+    void sendNumbers(User user, Integer value1, Integer value2);
 
-    String getCategory();
+    Map<Integer, String> getPlayers();
 }
