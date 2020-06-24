@@ -3,11 +3,10 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
@@ -26,36 +25,15 @@
          </TableView>
       </bottom>
       <center>
-         <HBox alignment="CENTER" BorderPane.alignment="CENTER">
-            <children>
-                  <VBox alignment="CENTER" prefHeight="200.0" prefWidth="200.0">
-                      <Label fx:id="p1Field" text="p1 game field" />
-                  <Spinner fx:id="p1nr" editable="true" prefWidth="200.0">
-                     <VBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </VBox.margin>
-                  </Spinner>
-                      <Button fx:id="p1Button" mnemonicParsing="false" onAction="#p1Send" text="Send" />
-                  <HBox.margin>
-                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                  </HBox.margin>
-                  </VBox>
-               <VBox alignment="CENTER" prefHeight="200.0" prefWidth="200.0">
-                  <children>
-                     <Label fx:id="p2Field" text="p2 game field" />
-                     <Spinner fx:id="p2nr" editable="true">
-                        <VBox.margin>
-                           <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                        </VBox.margin>
-                     </Spinner>
-                     <Button fx:id="p2Button" mnemonicParsing="false" onAction="#p2Send" text="Send" />
-                  </children>
-                  <HBox.margin>
-                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                  </HBox.margin>
-               </VBox>
-            </children>
-         </HBox>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                <Label fx:id="letterSet" text="Letter Set" />
+            <TextField fx:id="newWord" maxWidth="200.0" prefWidth="200.0" promptText="New Word">
+               <VBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </VBox.margin>
+            </TextField>
+                <Button fx:id="send" mnemonicParsing="false" onAction="#send" text="Send" />
+            </VBox>
       </center>
     </BorderPane>
 </StackPane>

@@ -21,27 +21,27 @@ public class RestController {
         this.gameRepo = gameRepository;
     }
 
-    @GetMapping("/game/{id}")
-    public Iterable<StudentDTO> getGameAndBombs(@PathVariable Integer id) {
-        List<StudentDTO> result = new ArrayList<>();
-        if (gameRepo.findByID(id) != null)
-            for (Round round : gameRepo.findByID(id).getRounds())
-                for (var a : round.getWords()) {
-                    result.add(new StudentDTO(a.getStudent(), a.getBomb1(), a.getBomb2()));
-                    break;
-                }
-        return result;
-    }
-
-    @GetMapping("")
-    public Iterable<Word> getWordsForGameWithCategory(@RequestParam("gameID") Integer gameID, @RequestParam("studentID") Integer studentID) {
-        List<Word> result = new ArrayList<>();
-        if (gameRepo.findByID(gameID) != null)
-            for (Round round : gameRepo.findByID(gameID).getRounds())
-                for (var a : round.getWords())
-                    if (a.getStudent().getId().equals(studentID))
-                        result.add(a);
-        return result;
-    }
+//    @GetMapping("/game/{id}")
+//    public Iterable<StudentDTO> getGameAndBombs(@PathVariable Integer id) {
+//        List<StudentDTO> result = new ArrayList<>();
+//        if (gameRepo.findByID(id) != null)
+//            for (Round round : gameRepo.findByID(id).getRounds())
+//                for (var a : round.getWords()) {
+//                    result.add(new StudentDTO(a.getStudent(), a.getBomb1(), a.getBomb2()));
+//                    break;
+//                }
+//        return result;
+//    }
+//
+//    @GetMapping("")
+//    public Iterable<Word> getWordsForGameWithCategory(@RequestParam("gameID") Integer gameID, @RequestParam("studentID") Integer studentID) {
+//        List<Word> result = new ArrayList<>();
+//        if (gameRepo.findByID(gameID) != null)
+//            for (Round round : gameRepo.findByID(gameID).getRounds())
+//                for (var a : round.getWords())
+//                    if (a.getStudent().getId().equals(studentID))
+//                        result.add(a);
+//        return result;
+//    }
 
 }

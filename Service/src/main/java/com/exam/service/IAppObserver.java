@@ -12,7 +12,7 @@ public interface IAppObserver extends Remote {
 
     void loggedIn(User user) throws RemoteException;
 
-    void playerCountUpdated(Integer count) throws RemoteException;
+    void playerCountUpdated(Integer count, Integer id) throws RemoteException;
 
     void loggedOut(User user) throws RemoteException;
 

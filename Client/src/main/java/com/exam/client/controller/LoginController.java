@@ -94,8 +94,8 @@ public class LoginController extends UnicastRemoteObject implements Initializabl
     }
 
     @Override
-    public void playerCountUpdated(Integer count) throws RemoteException {
-        appController.playerCountUpdated(count);
+    public void playerCountUpdated(Integer count, Integer id) throws RemoteException {
+        appController.playerCountUpdated(count, id);
     }
 
     @Override

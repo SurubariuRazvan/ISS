@@ -3,36 +3,37 @@ package com.exam.server;
 import com.exam.domain.*;
 import com.exam.repository.GameRepository;
 import com.exam.repository.UserRepository;
+import com.exam.repository.WordRepository;
 import com.exam.service.AppServiceException;
 import com.exam.service.IAppObserver;
 import com.exam.service.IAppServices;
-import org.apache.logging.log4j.util.SortedArrayStringMap;
-import org.hibernate.type.SortedMapType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 
 
 @Service
 public class AppServicesImpl implements IAppServices {
     private final UserRepository userRepo;
     private final GameRepository gameRepository;
+    private final WordRepository wordRepository;
     private final Map<Integer, LoggedUser> loggedUsers;
+    private final Random rand;
     private Game game;
     private Round currentRound;
     private Integer roundNumber;
-    private Integer activePlayers = 0;
-    private Map<Integer, String> gameStates = new HashMap<>();
+    private LetterSet currentLetterSet;
 
     @Autowired
-    public AppServicesImpl(UserRepository userRepository, GameRepository gameRepository) {
+    public AppServicesImpl(UserRepository userRepository, GameRepository gameRepository, WordRepository wordRepository) {
         this.userRepo = userRepository;
         this.gameRepository = gameRepository;
+        this.wordRepository = wordRepository;
         this.loggedUsers = new ConcurrentHashMap<>();
+        this.rand = new Random();
         addData();
     }
 
@@ -41,6 +42,25 @@ public class AppServicesImpl implements IAppServices {
         userRepo.save(new Student(null, "ion2", "a", "Ionel2"));
         userRepo.save(new Student(null, "ion3", "a", "Ionel3"));
         userRepo.save(new Student(null, "ion4", "a", "Ionel4"));
+
+        LetterSet letterSet = new LetterSet(null, "['a','c','e','r']", null, new HashSet<>());
+        Set<LetterSetValue> letterSetValue = new HashSet<>();
+        letterSetValue.add(new LetterSetValue(null, letterSet, 4, "care"));
+        letterSetValue.add(new LetterSetValue(null, letterSet, 6, "acre"));
+        letterSetValue.add(new LetterSetValue(null, letterSet, 7, "arce"));
+        letterSetValue.add(new LetterSetValue(null, letterSet, 3, "cer"));
+        letterSetValue.add(new LetterSetValue(null, letterSet, 4, "arc"));
+        letterSetValue.add(new LetterSetValue(null, letterSet, 3, "car"));
+        letterSet.setLetterSetValue(letterSetValue);
+        wordRepository.save(letterSet);
+
+        LetterSet letterSet1 = new LetterSet(null, "['a','b','c','r']", null, new HashSet<>());
+        Set<LetterSetValue> letterSetValue1 = new HashSet<>();
+        letterSetValue1.add(new LetterSetValue(null, letterSet1, 4, "bac"));
+        letterSetValue1.add(new LetterSetValue(null, letterSet1, 6, "rac"));
+        letterSetValue1.add(new LetterSetValue(null, letterSet1, 7, "crab"));
+        letterSet1.setLetterSetValue(letterSetValue1);
+        wordRepository.save(letterSet1);
     }
 
     @Override
@@ -55,18 +75,28 @@ public class AppServicesImpl implements IAppServices {
     }
 
     @Override
-    public void sendNumbers(User user, Integer value1, Integer value2) {
-        loggedUsers.get(user.getId()).setBomb1(value1);
-        loggedUsers.get(user.getId()).setBomb2(value2);
+    public String getLetterSet() {
+        return currentLetterSet.getLetter_Set();
+    }
 
-        activePlayers++;
-        for (var u : loggedUsers.values()) {
+    @Override
+    public synchronized void playerCountChanged(Integer id) {
+        for (var user : loggedUsers.values()) {
             try {
-                u.getObserver().playerCountUpdated(activePlayers);
+                user.getObserver().playerCountUpdated(loggedUsers.size(), id);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void setNewLetterSet() {
+        int value = rand.nextInt(2);
+        for (var letterSet : wordRepository.findAll())
+            if (value-- == 0) {
+                this.currentLetterSet = letterSet;
+                break;
+            }
     }
 
     @Override
@@ -74,15 +104,15 @@ public class AppServicesImpl implements IAppServices {
         LoggedUser loggedUser = loggedUsers.get(userID);
         if (loggedUser != null) {
             loggedUsers.remove(userID);
-//            playerCountChanged();
         } else
             throw new AppServiceException("User isn't logged in");
     }
 
     @Override
     public void notifyStartGame() {
+        setNewLetterSet();
         game = new Game(null);
-        currentRound = new Round(null, game, new HashSet<>());
+        currentRound = new Round(null, game, new HashSet<>(), currentLetterSet);
         roundNumber = 0;
         for (var user : loggedUsers.values()) {
             try {
@@ -91,13 +121,12 @@ public class AppServicesImpl implements IAppServices {
                 e.printStackTrace();
             }
         }
-        for (var id : loggedUsers.keySet())
-            this.gameStates.put(id, "______");
     }
 
     public void handleRound() {
+        setNewLetterSet();
         sendScores(currentRound);
-        currentRound = new Round(null, game, new HashSet<>());
+        currentRound = new Round(null, game, new HashSet<>(), currentLetterSet);
     }
 
     private void sendScores(Round currentRound) {
@@ -111,22 +140,18 @@ public class AppServicesImpl implements IAppServices {
     }
 
     @Override
-    public void sendWord(User user, Integer toUser, Integer nr) {
-        nr = nr - 1;
-        char[] state = this.gameStates.get(toUser).toCharArray();
-        int b1 = loggedUsers.get(toUser).getBomb1();
-        int b2 = loggedUsers.get(toUser).getBomb2();
-        if (b1 - 1 == nr || b2 - 1 == nr || b1 + 1 == nr || b2 + 1 == nr) {
-            state[nr] = 'B';
-            currentRound.getWords().add(new Word(null, (Student) user, toUser, currentRound, nr + 1, 5, loggedUsers.get(user.getId()).getBomb1(), loggedUsers.get(user.getId()).getBomb2()));
-        } else if (b1 == nr || b2 == nr) {
-            state[nr] = 'C';
-            currentRound.getWords().add(new Word(null, (Student) user, toUser, currentRound, nr + 1, 3, loggedUsers.get(user.getId()).getBomb1(), loggedUsers.get(user.getId()).getBomb2()));
-        } else {
-            state[nr] = 'S';
-            currentRound.getWords().add(new Word(null, (Student) user, toUser, currentRound, nr + 1, 0, loggedUsers.get(user.getId()).getBomb1(), loggedUsers.get(user.getId()).getBomb2()));
-        }
-        this.gameStates.put(toUser, String.valueOf(state));
+    public void sendWord(User user, String text) {
+        String strippedLetterSet = currentLetterSet.getLetter_Set().replace("[", "").replace(",", "").replace("]", "").replace("'", "");
+        LetterSetValue found = null;
+        for (var a : currentLetterSet.getLetterSetValue())
+            if (a.getWord().equals(text))
+                found = a;
+        if (found == null)
+            currentRound.getWords().add(new Word(null, (Student) user, currentRound, text, 0));
+        else if (found.getWord().length() == strippedLetterSet.length())
+            currentRound.getWords().add(new Word(null, (Student) user, currentRound, text, found.getValue()));
+        else
+            currentRound.getWords().add(new Word(null, (Student) user, currentRound, text, found.getValue() - strippedLetterSet.length() + text.length()));
         if (currentRound.getWords().size() == 3) {
             game.addRound(currentRound);
             handleRound();
@@ -145,10 +170,5 @@ public class AppServicesImpl implements IAppServices {
                 e.printStackTrace();
             }
         }
-    }
-
-    @Override
-    public Map<Integer, String> getPlayers() {
-        return this.gameStates;
     }
 }

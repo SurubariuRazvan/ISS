@@ -18,5 +18,7 @@
         <mapping class="com.exam.domain.Round"/>
         <mapping class="com.exam.domain.Word"/>
         <mapping class="com.exam.domain.UserType"/>
+        <mapping class="com.exam.domain.LetterSet"/>
+        <mapping class="com.exam.domain.LetterSetValue"/>
     </session-factory>
 </hibernate-configuration>

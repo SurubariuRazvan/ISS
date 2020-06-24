@@ -2,7 +2,6 @@ package com.exam.service;
 
 import com.exam.domain.*;
 
-import java.util.List;
 import java.util.Map;
 
 public interface IAppServices {
@@ -12,9 +11,9 @@ public interface IAppServices {
 
     void notifyStartGame();
 
-    void sendWord(User user, Integer toUser, Integer text);
+    void playerCountChanged(Integer id);
 
-    void sendNumbers(User user, Integer value1, Integer value2);
+    void sendWord(User user, String text);
 
-    Map<Integer, String> getPlayers();
+    String getLetterSet();
 }
